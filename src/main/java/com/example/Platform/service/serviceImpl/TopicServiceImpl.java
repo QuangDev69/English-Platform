@@ -1,7 +1,6 @@
 package com.example.Platform.service.serviceImpl;
 
 import com.example.Platform.dto.TopicDTO;
-import com.example.Platform.entity.Level;
 import com.example.Platform.entity.Topic;
 import com.example.Platform.repository.TopicRepository;
 import com.example.Platform.service.TopicService;

@@ -1,8 +1,6 @@
 package com.example.Platform.service;
 
-import com.example.Platform.dto.LevelDTO;
 import com.example.Platform.dto.TopicDTO;
-import com.example.Platform.entity.Level;
 import com.example.Platform.entity.Topic;
 
 import java.util.List;
