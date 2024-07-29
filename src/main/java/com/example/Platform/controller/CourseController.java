@@ -2,15 +2,20 @@ package com.example.Platform.controller;
 
 import com.example.Platform.dto.CourseDTO;
 import com.example.Platform.entity.Course;
+import com.example.Platform.response.CourseResponse;
 import com.example.Platform.service.CourseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/courses")
@@ -24,20 +29,35 @@ public class CourseController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getCoursesById(@PathVariable Long id){
-        return ResponseEntity.ok("Get courses by " + id + " successfully!");
-    }
+    public ResponseEntity<?> getCoursesById(@PathVariable("id") Long courseId){
+        try {
+            Course existCourse = courseService.getById(courseId);
+            return ResponseEntity.ok(CourseResponse.fromEntityToRes(existCourse));
 
+        }catch (Exception e){
+            return  ResponseEntity.badRequest().body(e.getMessage());
+        }
+
+    }
     @PostMapping("/")
-    public ResponseEntity<?> createCourses(@Valid @RequestBody CourseDTO courseDTO, BindingResult result) throws Exception {
-        if(result.hasErrors()) {
-            List<String> errMessage= result.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
+    public ResponseEntity<?> createCourses(
+            @ModelAttribute @Valid CourseDTO courseDTO,
+            BindingResult result) {
+        if (result.hasErrors()) {
+            List<String> errMessage = result.getFieldErrors().stream()
+                    .map(FieldError::getDefaultMessage)
+                    .collect(Collectors.toList());
             return ResponseEntity.badRequest().body(errMessage);
         }
 
-        Course newCourse = courseService.createCourse(courseDTO);
-        return ResponseEntity.ok("Create courses by successfully! "+ newCourse);
+        try {
+            Course newCourse = courseService.createCourse(courseDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(newCourse);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
+
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteCourse(@PathVariable Long id){

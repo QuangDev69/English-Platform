@@ -1,9 +1,12 @@
 package com.example.Platform.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -22,7 +25,8 @@ public class Topic {
     private String topicName;
 
     @ManyToMany(mappedBy = "topics")
-    private Set<Course> courses;
+    @JsonBackReference
+    private Set<Course> courses= new HashSet<>();;
 
 
 }

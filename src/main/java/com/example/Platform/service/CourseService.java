@@ -2,6 +2,7 @@ package com.example.Platform.service;
 
 import com.example.Platform.dto.CourseDTO;
 import com.example.Platform.entity.Course;
+import com.example.Platform.response.CourseResponse;
 
 import java.util.List;
 

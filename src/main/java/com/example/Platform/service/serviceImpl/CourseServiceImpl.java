@@ -68,10 +68,14 @@ import com.example.Platform.exception.DataNotFoundException;
 import com.example.Platform.repository.CourseRepository;
 import com.example.Platform.repository.LevelRepository;
 import com.example.Platform.repository.TopicRepository;
+import com.example.Platform.response.CourseResponse;
 import com.example.Platform.service.CourseService;
+import com.example.Platform.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -82,22 +86,33 @@ public class CourseServiceImpl implements CourseService {
     private final LevelRepository levelRepository;
     private final TopicRepository topicRepository;
     private final CourseRepository courseRepository;
+    private final FileService fileService;
     private final CourseConverter courseConverter;
 
 
     @Override
-    public Course createCourse(CourseDTO courseDTO) {
+    public Course createCourse(CourseDTO courseDTO) throws IOException {
         Level exLevel = levelRepository.findById(courseDTO.getLevelId())
                 .orElseThrow(() -> new DataNotFoundException("Level not found!"));
-        Topic exTopic = topicRepository.findById(courseDTO.getTopicId())
-                .orElseThrow(() -> new DataNotFoundException("Topic not found!"));
+
+        Set<Topic> topics = new HashSet<>();
+        for (Long topicId : courseDTO.getTopicId()) {
+            Topic exTopic = topicRepository.findById(topicId)
+                    .orElseThrow(() -> new DataNotFoundException("Topic not found!"));
+            topics.add(exTopic);
+        }
 
         Course newCourse = courseConverter.toEntity(courseDTO);
+        if (courseDTO.getImage() != null && !courseDTO.getImage().isEmpty()) {
+            String imagePath = fileService.storeFile(courseDTO.getImage());
+            newCourse.setImagePath(imagePath);
+        }
+
 
         newCourse.setLevel(exLevel);
-        Set<Topic> topics = new HashSet<>();
-        topics.add(exTopic);
         newCourse.setTopics(topics);
+        exLevel.getCourse().add(newCourse);
+
         return courseRepository.save(newCourse);
     }
 
