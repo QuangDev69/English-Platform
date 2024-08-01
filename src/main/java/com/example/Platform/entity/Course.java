@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,13 +16,19 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Course  extends BasenEntity {
+public class Course extends BasenEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long courseId;
     private String courseName;
     private String courseDes;
-    private String imagePath;
+    private Boolean isActive;
+
+    @OneToMany(mappedBy = "course",
+                cascade = CascadeType.ALL,
+                orphanRemoval = true)
+    @JsonBackReference
+    private Set<CourseImage> images = new HashSet<>();
 
     @ManyToOne
     @JoinColumn(name = "level_id")
@@ -36,5 +41,13 @@ public class Course  extends BasenEntity {
             joinColumns = @JoinColumn(name = "course_id"),
             inverseJoinColumns = @JoinColumn(name = "topic_id")
     )
-    private Set<Topic> topics  = new HashSet<>();
+    private Set<Topic> topics = new HashSet<>();
+
+
+    @OneToMany(mappedBy = "course",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    @JsonBackReference
+    private Set<Lesson> lessons = new HashSet<>();
+
 }

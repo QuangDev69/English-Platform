@@ -11,7 +11,6 @@ import lombok.*;
 @Builder
 public class TopicDTO {
 
-    @NotEmpty(message = "Can not be empty")
-
+    @NotEmpty(message = "Topic name Can not be empty")
     private String topicName;
 }

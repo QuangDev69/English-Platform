@@ -16,20 +16,26 @@ import java.util.List;
 @Builder
 
 public class CourseDTO {
-    @NotBlank(message = "Can not be empty")
+    @NotBlank(message = "Course Name Can not be empty")
     @Size(min = 3, max = 100, message = "Must be between 3 to 100 char")
     private String courseName;
 
-    @NotBlank(message = "Can not be empty")
+    @NotBlank(message = "Course Des Can not be empty")
     @Size(min = 3, max = 200, message = "Must be between 3 to 200 char")
     private String courseDes;
 
-    private MultipartFile image;
+    @Size(max= 3, message = "Must be  3 file")
+    private List<MultipartFile> images;
 
-    @NotNull(message = "Can not be empty")
+    @NotNull(message = "Topic Can not be empty")
     @Size(max = 3, message = "Only select up to 3 topics")
     private List<Long> topicId;
 
-    @NotNull(message = "Can not be empty")
+    @NotNull(message = "Level Can not be empty")
     private Long levelId;
+
+    @NotNull(message = "Active type Can not be empty")
+    private Long isActive;
+
+
 }

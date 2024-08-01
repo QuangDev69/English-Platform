@@ -20,6 +20,11 @@ public class CourseConverter {
         this.typeMap = modelMapper.createTypeMap(CourseDTO.class, Course.class);
         this.typeMap.addMappings(mapper -> {
             mapper.skip(Course::setCourseId);
+
+        });
+        this.typeMap.addMappings(mapper -> {
+            mapper.skip(Course::setImages);
+
         });
     }
 

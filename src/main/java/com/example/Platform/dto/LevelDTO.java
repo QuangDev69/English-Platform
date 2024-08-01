@@ -10,6 +10,6 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class LevelDTO {
-    @NotEmpty(message = "Can not be empty")
+    @NotEmpty(message = "Level name Can not be empty")
     private String levelName;
 }
