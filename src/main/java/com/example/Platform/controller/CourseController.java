@@ -4,8 +4,10 @@ import com.example.Platform.dto.CourseDTO;
 import com.example.Platform.entity.Course;
 import com.example.Platform.exception.DataNotFoundException;
 import com.example.Platform.response.CourseResponse;
+import com.example.Platform.response.LessonResponse;
 import com.example.Platform.response.ListCourseResponse;
 import com.example.Platform.service.CourseService;
+import com.example.Platform.service.LessonService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,10 +26,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/courses")
+@RequestMapping("${api.prefix}/courses")
 @RequiredArgsConstructor
 public class CourseController {
     private final CourseService courseService;
+    private final LessonService lessonService;
+
 
     @GetMapping("/getAllCourses")
     public ResponseEntity<?> getAllCourses(
@@ -148,8 +152,14 @@ public class CourseController {
         }
     }
 
-
-
-
+    @GetMapping("/{id}/allLesson")
+    public ResponseEntity<?> getAllLessonByCourseId(@PathVariable Long id) {
+        try {
+            List<LessonResponse> lessons = lessonService.getAllLessonByCourseId(id);
+            return ResponseEntity.ok(lessons);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
 }

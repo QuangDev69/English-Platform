@@ -46,27 +46,23 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     public void deleteLesson(Long id) {
-
+        lessonRepository.deleteById(id);
     }
 
     @Override
     public Lesson updateLesson(LessonDTO lessonDTO, Long id) throws IOException {
-        Lesson existingLesson = lessonRepository.findById(id).orElseThrow(() ->
+        Lesson existLesson = lessonRepository.findById(id).orElseThrow(() ->
                 new DataNotFoundException("Lesson not found"));
 
-        // Cập nhật thông tin cho bài học
-        existingLesson.setLessonName(lessonDTO.getLessonName());
-        existingLesson.setLessonDes(lessonDTO.getLessonDes());
-        existingLesson.setCode(lessonDTO.getCode());
-        existingLesson.setContent(lessonDTO.getContent());
+        lessonConvert.updateEntity(lessonDTO, existLesson);
 
         // Nếu có cập nhật courseId
-        if (lessonDTO.getCourseId() != null && !lessonDTO.getCourseId().equals(existingLesson.getCourse().getCourseId())) {
+        if (lessonDTO.getCourseId() != null && !lessonDTO.getCourseId().equals(existLesson.getCourse().getCourseId())) {
             Course existCourse = courseRepository.findById(lessonDTO.getCourseId()).orElseThrow(() ->
                     new DataNotFoundException("Course id not found!"));
-            existingLesson.setCourse(existCourse);
+            existLesson.setCourse(existCourse);
         }
 
-        return lessonRepository.save(existingLesson);
+        return lessonRepository.save(existLesson);
     }
 }

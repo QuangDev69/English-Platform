@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/topics")
+@RequestMapping("${api.prefix}/topics")
 @RequiredArgsConstructor
 public class TopicController {
     private final TopicService topicService;
@@ -37,7 +37,6 @@ public class TopicController {
     @PostMapping("/")
     public ResponseEntity<?> createTopic(@RequestBody TopicDTO topicDTO){
         Topic newTopic = topicService.createTopic(topicDTO);
-        System.out.println(topicDTO.getTopicName());
         return ResponseEntity.ok("Insert category successfully: " + newTopic.getTopicName());
     }
 
@@ -50,8 +49,6 @@ public class TopicController {
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updateTopic(@RequestBody TopicDTO topicDTO, @PathVariable Long id){
         topicService.updateTopic(topicDTO, id);
-        System.out.println("Topic name con:"+topicDTO.getTopicName());
-
         return ResponseEntity.ok("Update " +id+ " successfully!");
     }
 

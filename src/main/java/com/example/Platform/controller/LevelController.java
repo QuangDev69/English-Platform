@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/levels")
+@RequestMapping("${api.prefix}/levels")
 @RequiredArgsConstructor
 public class LevelController {
     private final LevelService levelService;

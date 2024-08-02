@@ -3,9 +3,11 @@ package com.example.Platform.controller;
 
 import com.example.Platform.dto.LessonDTO;
 import com.example.Platform.entity.Lesson;
+import com.example.Platform.entity.Question;
 import com.example.Platform.exception.DataNotFoundException;
 import com.example.Platform.response.LessonResponse;
 import com.example.Platform.service.LessonService;
+import com.example.Platform.service.QuestionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +20,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/lessons")
+@RequestMapping("${api.prefix}/lessons")
 @RequiredArgsConstructor
 public class LessonController {
     private final LessonService lessonService;
+    private final QuestionService questionService;
 
     @PostMapping("/")
     public ResponseEntity<?> createLesson (@Valid @RequestBody LessonDTO lessonDTO, BindingResult result) throws Exception {
@@ -44,16 +47,17 @@ public class LessonController {
            return ResponseEntity.badRequest().body(e.getMessage());
        }
     }
-
-    @GetMapping("/{courseId}/all")
-    public ResponseEntity<?> getAllLessonByCourseId(@PathVariable Long courseId) {
+    @GetMapping("/{id}/questions")
+    public ResponseEntity<?> getQuestionByLessonId(@PathVariable Long id) {
         try {
-            List<LessonResponse> lessons = lessonService.getAllLessonByCourseId(courseId);
-            return ResponseEntity.ok(lessons);
-        } catch (Exception e) {
+            List<Question> questions = questionService.getQuestionByLessonID(id);
+            return ResponseEntity.ok(questions);
+        }catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateLesson(@Valid @RequestBody LessonDTO lessonDTO, @PathVariable Long id, BindingResult result) throws IOException {
@@ -69,6 +73,12 @@ public class LessonController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteCourse(@PathVariable Long id) {
+             lessonService.deleteLesson(id);
+             return ResponseEntity.ok("Delete lesson " +id + " successfully!");
     }
 
 }
