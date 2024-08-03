@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @MappedSuperclass
-public class BasenEntity {
+public class BaseEntity {
 
     @Column(name="created_at")
     @CreationTimestamp
