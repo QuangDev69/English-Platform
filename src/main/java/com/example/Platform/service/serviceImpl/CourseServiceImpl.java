@@ -144,6 +144,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    @Transactional
     public void deleteCourse(Long id) {
         Course exCourse = courseRepository.findById(id).orElseThrow(() -> new DataNotFoundException("Not exist!"));
         if (exCourse != null) {

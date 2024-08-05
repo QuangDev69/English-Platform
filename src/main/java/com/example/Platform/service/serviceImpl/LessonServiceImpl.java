@@ -9,6 +9,7 @@ import com.example.Platform.repository.CourseRepository;
 import com.example.Platform.repository.LessonRepository;
 import com.example.Platform.response.LessonResponse;
 import com.example.Platform.service.LessonService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -45,11 +46,15 @@ public class LessonServiceImpl implements LessonService {
     }
 
     @Override
+    @Transactional
+
     public void deleteLesson(Long id) {
         lessonRepository.deleteById(id);
     }
 
     @Override
+    @Transactional
+
     public Lesson updateLesson(LessonDTO lessonDTO, Long id) throws IOException {
         Lesson existLesson = lessonRepository.findById(id).orElseThrow(() ->
                 new DataNotFoundException("Lesson not found"));

@@ -36,6 +36,7 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeRequest  -> authorizeRequest
                         .requestMatchers(String.format("%s/user/**",apiPrefix)).permitAll()
+                        .requestMatchers(String.format("%s/user/{id}",apiPrefix)).permitAll()
                         .requestMatchers(HttpMethod.GET, String.format("%s/course**", apiPrefix)).permitAll()
                         .requestMatchers(HttpMethod.GET, String.format("%s/lessons/**", apiPrefix)).permitAll()
                         .requestMatchers(HttpMethod.GET, String.format("%s/questions/**", apiPrefix)).permitAll()

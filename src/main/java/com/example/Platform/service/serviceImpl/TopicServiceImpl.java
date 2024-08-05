@@ -5,6 +5,7 @@ import com.example.Platform.entity.Topic;
 import com.example.Platform.repository.TopicRepository;
 import com.example.Platform.service.TopicService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +41,7 @@ public class TopicServiceImpl implements TopicService {
     }
 
     @Override
+    @Transactional
     public void updateTopic(TopicDTO topicDTO, Long id) {
         Topic exTopic = getTopicById(id);
         System.out.println("Topic name serv:"+exTopic.getTopicName());

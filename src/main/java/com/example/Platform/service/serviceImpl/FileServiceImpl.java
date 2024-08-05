@@ -1,6 +1,7 @@
 package com.example.Platform.service.serviceImpl;
 
 import com.example.Platform.service.FileService;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +19,7 @@ public class FileServiceImpl implements FileService {
     private final Path rootLocation = Paths.get("uploads");
 
     @Override
+    @Transactional
     public String storeFile(MultipartFile file) throws IOException {
         if (!isImageFile(file) || file.getOriginalFilename() == null) {
             throw new IOException("Invalid image format");
@@ -40,6 +42,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
+    @Transactional
     public void deleteFile(String filePath) throws IOException {
         Path path = rootLocation.resolve(filePath).normalize().toAbsolutePath();
         System.out.println("Attempting to delete file at: " + path);

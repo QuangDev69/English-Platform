@@ -11,6 +11,7 @@ import com.example.Platform.exception.DataNotFoundException;
 import com.example.Platform.repository.LessonRepository;
 import com.example.Platform.repository.QuestionRepository;
 import com.example.Platform.service.QuestionService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -61,6 +62,8 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
+    @Transactional
+
     public Question updateQuestion(Long questionId, QuestionDTO questionDTO) {
         Question existingQuestion = questionRepository.findById(questionId)
                 .orElseThrow(() -> new DataNotFoundException("Question id not found!"));

@@ -9,6 +9,7 @@ import com.example.Platform.exception.DataNotFoundException;
 import com.example.Platform.repository.RoleRepository;
 import com.example.Platform.repository.UserRepository;
 import com.example.Platform.service.UserService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,6 +29,7 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final UserConverter userConverter;
 
     @Override
     public User createUser(UserDTO userDTO) throws DataNotFoundException {
@@ -74,6 +76,24 @@ public class UserServiceImpl implements UserService {
         } catch (BadCredentialsException e) {
             throw new Exception("Incorrect username, phone number, or password", e);
         }
+    }
+
+    @Override
+    public void deleteUserById(Long id) {
+        userRepository.deleteById(id);
+    }
+
+    @Override
+    public Optional<User> getUserById(Long id) {
+        return userRepository.findById(id);
+    }
+
+    @Override
+    @Transactional
+    public User updateUser(Long id, UserDTO userDetails) {
+        User existUser = userRepository.findById(id).orElseThrow(null);
+        userConverter.updateEntity(userDetails, existUser);
+        return existUser;
     }
 
     @Override
