@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,6 +71,7 @@ public class CourseController {
     }
 
     @PostMapping("/")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createCourses(
             @Valid @ModelAttribute CourseDTO courseDTO,
             BindingResult result) {
@@ -80,6 +83,9 @@ public class CourseController {
         }
 
         try {
+            if (courseDTO.getImages() == null) {
+                courseDTO.setImages(new ArrayList<>());
+            }
             Course newCourse = courseService.createCourse(courseDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(newCourse);
         } catch (Exception e) {
@@ -89,12 +95,15 @@ public class CourseController {
 
 
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteCourse(@PathVariable Long id) {
         courseService.deleteCourse(id);
         return ResponseEntity.ok("Delete " + id + " successfully!");
     }
 
     @PutMapping("/update/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+
     public ResponseEntity<?> updateCourse(@Valid @ModelAttribute CourseDTO courseDTO, @PathVariable Long id, BindingResult result) {
         if (result.hasErrors()) {
             List<String> errMessage = result.getFieldErrors().stream()
@@ -120,6 +129,8 @@ public class CourseController {
     }
 
     @PostMapping("/{id}/addImage")
+    @PreAuthorize("hasRole('ADMIN')")
+
     public ResponseEntity<?> addImageToCourse(@PathVariable Long id, @RequestParam("image") List<MultipartFile> images) {
         try {
             Course updatedCourse = courseService.getById(id);
@@ -139,6 +150,8 @@ public class CourseController {
     }
 
     @DeleteMapping("/removeImage/{imageId}")
+    @PreAuthorize("hasRole('ADMIN')")
+
     public ResponseEntity<?> removeImage(@PathVariable Long imageId) {
         try {
             Course updatedCourse = courseService.removeImageById(imageId);

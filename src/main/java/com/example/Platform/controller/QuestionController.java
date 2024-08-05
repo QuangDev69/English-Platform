@@ -9,6 +9,7 @@ import com.example.Platform.service.QuestionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +24,7 @@ public class QuestionController {
     private final QuestionService questionService;
 
     @PostMapping("/create/{lessonId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createQuestion(@RequestBody QuestionDTO questionDTO, @PathVariable Long lessonId, BindingResult result) {
         if (result.hasErrors()) {
             List<String> errMessage = result.getFieldErrors().stream()
@@ -59,6 +61,7 @@ public class QuestionController {
     }
 
     @PutMapping("/update/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateQuestion(@PathVariable Long id, @RequestBody QuestionDTO questionDTO, BindingResult result) {
         if (result.hasErrors()) {
             List<String> errMessage = result.getFieldErrors().stream()
@@ -77,6 +80,7 @@ public class QuestionController {
     }
 
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteQuestion(@PathVariable Long id){
         questionService.deleteQuestion(id);
         return ResponseEntity.ok("Delete question " +id+" successfully!");

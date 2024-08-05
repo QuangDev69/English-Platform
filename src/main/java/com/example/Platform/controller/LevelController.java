@@ -7,6 +7,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,6 +35,7 @@ public class LevelController {
     }
 
     @PostMapping("/")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createLevel(@RequestBody LevelDTO levelDTO){
         Level newLevel = levelService.createLevel(levelDTO);
         System.out.println(levelDTO.getLevelName());
@@ -41,12 +43,14 @@ public class LevelController {
     }
 
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteLevel(@PathVariable Long id){
         levelService.deleteLevel(id);
         return ResponseEntity.ok("Delete Level " +id+ " successfully!");
     }
 
     @PutMapping("/update/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateLevel(@RequestBody LevelDTO levelDTO, @PathVariable Long id){
         levelService.updateLevel(levelDTO,id);
         return ResponseEntity.ok("Update " +levelDTO.getLevelName()+ " successfully!");

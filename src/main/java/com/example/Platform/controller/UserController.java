@@ -3,14 +3,19 @@ package com.example.Platform.controller;
 import com.example.Platform.dto.UserDTO;
 import com.example.Platform.dto.UserLoginDTO;
 import com.example.Platform.entity.User;
+import com.example.Platform.middleware.JwtUtil;
+import com.example.Platform.response.AuthenticationResponse;
 import com.example.Platform.service.UserService;
+import com.example.Platform.service.serviceImpl.CustomUserDetailsService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,10 +24,12 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/auth")
+@RequestMapping("${api.prefix}/user")
 public class UserController {
     private final UserService userService;
-    private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final CustomUserDetailsService userDetailsService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtil;
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserDTO userDTO, BindingResult result) {
@@ -46,7 +53,28 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@Valid @RequestBody UserLoginDTO userLoginDTO, BindingResult result) {
+        if (result.hasErrors()) {
+            List<String> errors = result.getFieldErrors()
+                    .stream()
+                    .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
+                    .collect(Collectors.toList());
+            return ResponseEntity.badRequest().body(errors);
+        }
 
-        return ResponseEntity.ok("Logged in successfully");
+        String loginIdentifier = userLoginDTO.getUsername() != null ? userLoginDTO.getUsername() : userLoginDTO.getPhoneNumber();
+
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginIdentifier, userLoginDTO.getPassword())
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(401).body("Incorrect username, phone number, or password");
+        }
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(loginIdentifier);
+        String jwt = jwtUtil.generateToken(userDetails);
+
+        return ResponseEntity.ok(new AuthenticationResponse(jwt));
     }
 }

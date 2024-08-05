@@ -114,17 +114,15 @@ public class CourseServiceImpl implements CourseService {
 
 
         Set<CourseImage> images = new HashSet<>();
-        for (MultipartFile image : courseDTO.getImages()) {
-            // Store the image file and get its storage URI
-            String uri = fileService.storeFile(image);
-            // Create a new CourseImage object and set its course and imageUrl properties
-            CourseImage courseImage = CourseImage.builder()
-                    .course(newCourse) // Associate this image with the current course
-                    .imageUrl(uri)     // Set the image URL obtained from the storage service
-                    .build();
-
-            // Add the newly created CourseImage object to the images set
-            images.add(courseImage);
+        if (courseDTO.getImages() != null) {
+            for (MultipartFile image : courseDTO.getImages()) {
+                String uri = fileService.storeFile(image);
+                CourseImage courseImage = CourseImage.builder()
+                        .course(newCourse)
+                        .imageUrl(uri)
+                        .build();
+                images.add(courseImage);
+            }
         }
         newCourse.setImages(images);
         newCourse.setLevel(exLevel);

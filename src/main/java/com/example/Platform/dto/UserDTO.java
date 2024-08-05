@@ -13,7 +13,7 @@ import java.util.Date;
 @Builder
 public class UserDTO {
     @NotBlank(message = "Full name is required!")
-    private String fullName;
+    private String fullname;
 
     @NotBlank(message = "user name is required!")
     private String username;

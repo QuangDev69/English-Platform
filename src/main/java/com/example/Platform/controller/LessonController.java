@@ -11,6 +11,7 @@ import com.example.Platform.service.QuestionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +28,7 @@ public class LessonController {
     private final QuestionService questionService;
 
     @PostMapping("/")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createLesson (@Valid @RequestBody LessonDTO lessonDTO, BindingResult result) throws Exception {
         if(result.hasErrors()){
             List<String> errMessage = result.getFieldErrors().stream()
@@ -60,6 +62,7 @@ public class LessonController {
 
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateLesson(@Valid @RequestBody LessonDTO lessonDTO, @PathVariable Long id, BindingResult result) throws IOException {
         if (result.hasErrors()) {
             List<String> errMessage = result.getFieldErrors().stream()
@@ -76,6 +79,7 @@ public class LessonController {
     }
 
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteCourse(@PathVariable Long id) {
              lessonService.deleteLesson(id);
              return ResponseEntity.ok("Delete lesson " +id + " successfully!");

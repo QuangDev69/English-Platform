@@ -9,6 +9,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,18 +36,21 @@ public class TopicController {
     }
 
     @PostMapping("/")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createTopic(@RequestBody TopicDTO topicDTO){
         Topic newTopic = topicService.createTopic(topicDTO);
         return ResponseEntity.ok("Insert category successfully: " + newTopic.getTopicName());
     }
 
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteTopic(@PathVariable Long id){
         topicService.deleteTopic(id);
         return ResponseEntity.ok("Delete Topic " +id+ " successfully!");
     }
 
     @PutMapping("/update/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateTopic(@RequestBody TopicDTO topicDTO, @PathVariable Long id){
         topicService.updateTopic(topicDTO, id);
         return ResponseEntity.ok("Update " +id+ " successfully!");

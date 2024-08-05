@@ -19,7 +19,7 @@ public class User extends BaseEntity  implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String fullName;
+    private String fullname;
 
     private String username;
 
@@ -35,10 +35,6 @@ public class User extends BaseEntity  implements UserDetails {
 
     private Date dateOfBirth;
 
-    private int facebookAccountId;
-
-    private int googleAccountId;
-
     @ManyToOne
     @JoinColumn(name = "role_id")
     private Role role;
@@ -52,8 +48,13 @@ public class User extends BaseEntity  implements UserDetails {
 
     @Override
     public String getUsername() {
+        return this.username;
+    }
+
+    public String getPhoneNumber() {
         return this.phoneNumber;
     }
+
 
     @Override
     public boolean isAccountNonExpired() {
@@ -74,4 +75,6 @@ public class User extends BaseEntity  implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
+
 }
