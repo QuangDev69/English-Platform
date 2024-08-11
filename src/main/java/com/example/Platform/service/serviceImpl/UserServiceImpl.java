@@ -6,8 +6,10 @@ import com.example.Platform.dto.UserLoginDTO;
 import com.example.Platform.entity.Role;
 import com.example.Platform.entity.User;
 import com.example.Platform.exception.DataNotFoundException;
+import com.example.Platform.middleware.JwtUtil;
 import com.example.Platform.repository.RoleRepository;
 import com.example.Platform.repository.UserRepository;
+import com.example.Platform.response.UserResponse;
 import com.example.Platform.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,8 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final UserConverter userConverter;
+    private final JwtUtil jwtUtil;
+
 
     @Override
     public User createUser(UserDTO userDTO) throws DataNotFoundException {
@@ -83,10 +87,24 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteById(id);
     }
 
+
+
     @Override
-    public Optional<User> getUserById(Long id) {
-        return userRepository.findById(id);
+    public UserResponse getUserDetail(String token) {
+        if(jwtUtil.isTokenExpired(token)){
+            throw new RuntimeException("Token is expire");
+        }
+        String phoneNumber = jwtUtil.extractPhoneNumber(token);
+        User user = userRepository.findByPhoneNumber(phoneNumber);
+        if(user!=null) {
+            return userConverter.toResponse(user);
+        }
+        else throw new RuntimeException("User not found");
     }
+
+
+
+
 
     @Override
     @Transactional

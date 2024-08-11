@@ -5,6 +5,7 @@ import com.example.Platform.dto.UserLoginDTO;
 import com.example.Platform.entity.User;
 import com.example.Platform.middleware.JwtUtil;
 import com.example.Platform.response.AuthenticationResponse;
+import com.example.Platform.response.UserResponse;
 import com.example.Platform.service.UserService;
 import com.example.Platform.service.serviceImpl.CustomUserDetailsService;
 import jakarta.validation.Valid;
@@ -80,11 +81,22 @@ public class UserController {
         return ResponseEntity.ok(new AuthenticationResponse(jwt));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        Optional<User> user = userService.getUserById(id);
-        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+
+
+    @GetMapping("/{userId}/details")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<?> getUserDetail(@RequestHeader("Authorization") String token){
+        try {
+            String extractToken = token.substring(7);
+            UserResponse user = userService.getUserDetail(extractToken);
+            return ResponseEntity.ok(user);
+        }
+        catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
     }
+
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteUserById(@PathVariable Long id) {
