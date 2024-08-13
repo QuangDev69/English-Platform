@@ -37,6 +37,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequest  -> authorizeRequest
                         .requestMatchers(String.format("%s/user/**",apiPrefix)).permitAll()
                         .requestMatchers(String.format("%s/user/{id}",apiPrefix)).permitAll()
+                        .requestMatchers(String.format("%s/password/**",apiPrefix)).permitAll()
                         .requestMatchers(HttpMethod.GET, String.format("%s/course**", apiPrefix)).permitAll()
                         .requestMatchers(HttpMethod.GET, String.format("%s/lessons/**", apiPrefix)).permitAll()
                         .requestMatchers(HttpMethod.GET, String.format("%s/questions/**", apiPrefix)).permitAll()

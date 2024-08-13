@@ -22,4 +22,6 @@ public interface UserService {
     User updateUser(Long id, UserDTO userDetails);
 
     UserResponse getUserDetail(String token);
+
+    void forgotPassword(String email);
 }

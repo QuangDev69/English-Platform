@@ -22,6 +22,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -82,16 +83,14 @@ public class UserController {
     }
 
 
-
     @GetMapping("/{userId}/details")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<?> getUserDetail(@RequestHeader("Authorization") String token){
+    public ResponseEntity<?> getUserDetail(@RequestHeader("Authorization") String token) {
         try {
             String extractToken = token.substring(7);
             UserResponse user = userService.getUserDetail(extractToken);
             return ResponseEntity.ok(user);
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
     }
@@ -106,8 +105,43 @@ public class UserController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody UserDTO userDetails) {
-        User updatedUser = userService.updateUser(id, userDetails);
-        return ResponseEntity.ok(updatedUser);
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @RequestBody UserDTO userDTO, BindingResult result) {
+        if (result.hasErrors()) {
+            List<String> errors = result.getFieldErrors()
+                    .stream()
+                    .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
+                    .collect(Collectors.toList());
+            return ResponseEntity.badRequest().body(errors);
+        }
+        try {
+            User updatedUser = userService.updateUser(id, userDTO);
+            return ResponseEntity.ok(updatedUser);
+        }
+        catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
     }
+
+
+//
+//    @PostMapping("/password/forgot")
+//    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
+//        String email = request.get("email");
+//        User user = userRepository.findByEmail(email)
+//                .orElseThrow(() -> new DataNotFoundException("Email not found"));
+//
+//        // Tạo token đặt lại mật khẩu
+//        String token = jwtUtil.generateResetToken(email);
+//
+//        // Lưu token và thời gian hết hạn vào DB (có thể tạo một bảng `PasswordResetToken`)
+//        PasswordResetToken resetToken = new PasswordResetToken(token, user);
+//        passwordResetTokenRepository.save(resetToken);
+//
+//        // Gửi email với liên kết đặt lại mật khẩu
+//        emailService.sendResetPasswordEmail(user.getEmail(), token);
+//
+//        return ResponseEntity.ok("Reset password email has been sent.");
+//    }
+
 }

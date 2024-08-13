@@ -6,6 +6,7 @@ import com.example.Platform.dto.UserLoginDTO;
 import com.example.Platform.entity.Role;
 import com.example.Platform.entity.User;
 import com.example.Platform.exception.DataNotFoundException;
+import com.example.Platform.exception.PermissionDenyException;
 import com.example.Platform.middleware.JwtUtil;
 import com.example.Platform.repository.RoleRepository;
 import com.example.Platform.repository.UserRepository;
@@ -23,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -42,11 +44,11 @@ public class UserServiceImpl implements UserService {
             throw new DataNotFoundException("Role id not found!");
         }
         String phoneNumber = userDTO.getPhoneNumber();
-        if(userRepository.existsByPhoneNumber(phoneNumber)) {
+        if (userRepository.existsByPhoneNumber(phoneNumber)) {
             throw new DataIntegrityViolationException("Phone number already exists");
         }
         String username = userDTO.getUsername();
-        if(userRepository.existsByUsername(username)) {
+        if (userRepository.existsByUsername(username)) {
             throw new DataIntegrityViolationException("Username already exists");
         }
 
@@ -88,34 +90,66 @@ public class UserServiceImpl implements UserService {
     }
 
 
-
     @Override
     public UserResponse getUserDetail(String token) {
-        if(jwtUtil.isTokenExpired(token)){
+        if (jwtUtil.isTokenExpired(token)) {
             throw new RuntimeException("Token is expire");
         }
         String phoneNumber = jwtUtil.extractPhoneNumber(token);
         User user = userRepository.findByPhoneNumber(phoneNumber);
-        if(user!=null) {
+        if (user != null) {
             return userConverter.toResponse(user);
-        }
-        else throw new RuntimeException("User not found");
+        } else throw new RuntimeException("User not found");
     }
 
+    @Override
+    public void forgotPassword(String email) {
 
-
+    }
 
 
     @Override
     @Transactional
-    public User updateUser(Long id, UserDTO userDetails) {
-        User existUser = userRepository.findById(id).orElseThrow(null);
-        userConverter.updateEntity(userDetails, existUser);
-        return existUser;
+    public User updateUser(Long id, UserDTO userDTO) {
+        User existUser = userRepository.findById(id).orElseThrow(() -> new DataNotFoundException("User not found with id: " + id));
+
+        String newPhone = userDTO.getPhoneNumber();
+        if (!existUser.getPhoneNumber().equals(userDTO.getPhoneNumber()) &&  userRepository.existsByPhoneNumber(newPhone)) {
+            throw new DataIntegrityViolationException("Phone number is already exists");
+        }
+
+        Role role = roleRepository.findById(userDTO.getRoleId()).orElseThrow(() -> new DataNotFoundException("Role not found with id: " + userDTO.getRoleId()));
+        userConverter.updateEntity(userDTO, existUser);
+
+        if(userDTO.getPassword() != null) {
+            String newPassword = passwordEncoder.encode(userDTO.getPassword());
+            existUser.setPassword(newPassword);
+        }
+
+        if (role.getId() == 2) {
+            throw new PermissionDenyException("You cannot update the account to an Admin role!");
+        }
+
+        existUser.setRole(role);
+        return userRepository.save(existUser);
     }
 
     @Override
     public User getUserByPhoneNumber(String phoneNumber) {
         return userRepository.findByPhoneNumber(phoneNumber);
     }
+
+//
+//    @Override
+//    public void forgotPassword(String email) {
+//        User user = userRepository.findByEmail(email);
+//
+//        // Tạo token đặt lại mật khẩu
+//        String token = UUID.randomUUID().toString();
+//        PasswordResetToken resetToken = new PasswordResetToken(token, user, LocalDateTime.now().plusMinutes(15));
+//        passwordResetTokenRepository.save(resetToken);
+//
+//        // Gửi email với liên kết đặt lại mật khẩu
+//        sendResetPasswordEmail(user.getEmail(), token);
+//    }
 }
