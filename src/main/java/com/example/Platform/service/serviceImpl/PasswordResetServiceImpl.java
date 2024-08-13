@@ -1,17 +1,16 @@
 package com.example.Platform.service.serviceImpl;
 
-import com.example.Platform.entity.PasswordResetToken;
 import com.example.Platform.entity.User;
-import com.example.Platform.repository.PasswordResetTokenRepository;
 import com.example.Platform.repository.UserRepository;
+import com.example.Platform.service.EmailService;
 import com.example.Platform.service.PasswordResetService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Duration;
 import java.util.UUID;
 
 @Service
@@ -19,51 +18,41 @@ import java.util.UUID;
 public class PasswordResetServiceImpl implements PasswordResetService {
 
     private final UserRepository userRepository;
-    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JavaMailSender mailSender;
+    private final EmailService emailService;
+    private final RedisTemplate<String, String> redisTemplate;
+
+
 
     @Override
     public void createPasswordResetToken(String email) {
+        // Tìm kiếm người dùng dựa trên địa chỉ email.
         User user = userRepository.findByEmail(email);
 
-        // Tạo token đặt lại mật khẩu
         String token = UUID.randomUUID().toString();
-        PasswordResetToken resetToken = new PasswordResetToken(token, user, LocalDateTime.now().plusMinutes(15));
-        passwordResetTokenRepository.save(resetToken);
+        System.out.println(token);
+        // Lấy một đối tượng ValueOperations từ RedisTemplate để lưu trữ dữ liệu dưới dạng key-value.
+        ValueOperations<String, String> ops = redisTemplate.opsForValue();
+        // Lưu token với giá trị là email của người dùng vào Redis, với thời gian sống là 5 phút.
+        ops.set(token, user.getEmail(), Duration.ofMinutes(5));
 
-        // Gửi email với liên kết đặt lại mật khẩu
-        sendResetPasswordEmail(user.getEmail(), token);
+        emailService.sendResetPasswordEmail(user.getEmail(), token);
     }
 
     @Override
     public void resetPassword(String token, String newPassword) {
-        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid token"));
+        // Lấy đối tượng ValueOperations từ RedisTemplate để truy xuất dữ liệu từ Redis.
+        ValueOperations<String, String> ops = redisTemplate.opsForValue();
 
-        if (resetToken.isExpired()) {
-            throw new RuntimeException("Token is expired");
-        }
+        // Truy xuất email liên kết với token từ Redis.
+        String email = ops.get(token);
 
-        User user = resetToken.getUser();
+        User user = userRepository.findByEmail(email);
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
-        // Xóa token sau khi đã sử dụng
-        passwordResetTokenRepository.delete(resetToken);
+        redisTemplate.delete(token);
     }
 
-    private void sendResetPasswordEmail(String email, String token) {
-        String resetUrl = "http://localhost:8080/api/v1/reset-password?token=" + token;
-        String subject = "Reset Password";
-        String message = "Click the link to reset your password: " + resetUrl;
-
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(email);
-        mailMessage.setSubject(subject);
-        mailMessage.setText(message);
-
-        mailSender.send(mailMessage);
-    }
 
 }
