@@ -73,8 +73,10 @@ import com.example.Platform.repository.TopicRepository;
 import com.example.Platform.response.CourseResponse;
 import com.example.Platform.service.CourseService;
 import com.example.Platform.service.FileService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.quartz.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -84,6 +86,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -100,6 +103,7 @@ public class CourseServiceImpl implements CourseService {
 
 
     @Override
+    @Transactional
     public Course createCourse(CourseDTO courseDTO) throws IOException {
         Level exLevel = levelRepository.findById(courseDTO.getLevelId())
                 .orElseThrow(() -> new DataNotFoundException("Level not found!"));
@@ -131,6 +135,8 @@ public class CourseServiceImpl implements CourseService {
 
         return courseRepository.save(newCourse);
     }
+
+
 
     @Override
     public Course getById(Long id) {
@@ -228,6 +234,7 @@ public class CourseServiceImpl implements CourseService {
 
         return courseRepository.save(course);
     }
+
 
 
 

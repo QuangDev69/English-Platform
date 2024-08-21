@@ -3,11 +3,15 @@ package com.example.Platform.service;
 import com.example.Platform.dto.CourseDTO;
 import com.example.Platform.entity.Course;
 import com.example.Platform.response.CourseResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.quartz.SchedulerException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface CourseService {
@@ -26,4 +30,7 @@ public interface CourseService {
 
     Course removeImageById(Long imageId) throws IOException;
 //    Course removeImage(Long courseId, String imagePath) throws IOException;
+
+//    void scheduleCourseCreation(CourseDTO courseDTO, Timestamp scheduleTime) throws SchedulerException;
+
 }

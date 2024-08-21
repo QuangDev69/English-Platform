@@ -14,7 +14,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-
 public class CourseDTO {
     @NotBlank(message = "Course Name Can not be empty")
     @Size(min = 3, max = 100, message = "Must be between 3 to 100 char")
