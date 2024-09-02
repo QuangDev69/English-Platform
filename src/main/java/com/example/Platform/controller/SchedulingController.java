@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @RestController
 @RequestMapping("${api.prefix}/schedules")
@@ -22,6 +23,12 @@ public class SchedulingController {
     @PostMapping("/course")
     public ResponseEntity<String> scheduleCourseCreation(@Valid @ModelAttribute CourseDTO courseDTO,
                                                          @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime scheduledTime) throws Exception {
+
+        LocalDateTime currentDate = LocalDateTime.now();
+        if(scheduledTime.isBefore(currentDate)) {
+            return ResponseEntity.badRequest().body("Schedule time is before the current date/time.");
+        }
+
         schedulingService.scheduleTask("CreateCourse", "CreateCourse", courseDTO, scheduledTime);
         return ResponseEntity.ok("Course creation scheduled successfully.");
     }
